@@ -40,10 +40,6 @@ This generates dataset files in `web/data/`, including:
 - `glove.2024.wikigiga.50d.top50000.txt`
 
 
-Open:
-- `http://localhost:8000/web/` (Python)
-- or the URL printed by `serve`
-
 ### 2) GitHub Pages deployment
 
 This repo includes a workflow at `.github/workflows/deploy-pages.yml` that deploys the `web/` folder on pushes to `main`.
