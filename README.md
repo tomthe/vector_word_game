@@ -2,7 +2,25 @@
 
 Single-player browser game using word embeddings.
 
-## 1) Build the reduced embedding file
+## For players
+
+- Play online (after GitHub Pages is enabled):
+  - `https://<your-github-username>.github.io/2026-02-26-vectorCodenames/`
+
+How to play:
+1. The game loads a small dataset by default (`top14000`).
+2. Optionally click **Load big dataset (medium, 50k)**.
+3. Enter a guess from autocomplete and submit.
+4. You score points when your guess is nearer to your words than to enemy words.
+
+Scoring:
+- `Score: points / rounds`
+- Distances are cosine distances (`1 - cosine similarity`).
+- You gain **1 point for each "Your word"** that is nearer than the nearest enemy word.
+
+## Development
+
+### 1) Build reduced embedding files
 
 From the workspace root:
 
@@ -10,15 +28,11 @@ From the workspace root:
 .\scripts\filter_embeddings.ps1
 ```
 
-Notes:
-- The script reads directly from `glove.2024.wikigiga.50d.zip`.
-- It also reads `word-frequency.zip` (`unigram_freq.csv`) and picks the most common words.
-- By default it creates:
-	- `web/data/glove.2024.wikigiga.50d.top14000.txt` (small)
-	- `web/data/glove.2024.wikigiga.50d.top50000.txt` (medium)
-- Output keeps frequency order and only writes words found in the embedding file.
+This generates dataset files in `web/data/`, including:
+- `glove.2024.wikigiga.50d.top14000.txt`
+- `glove.2024.wikigiga.50d.top50000.txt`
 
-## 2) Run the game in a local web server
+### 2) Run locally
 
 From the workspace root, run one of these:
 
@@ -30,23 +44,16 @@ python -m http.server 8000
 npx serve .
 ```
 
-Then open:
+Open:
 - `http://localhost:8000/web/` (Python)
 - or the URL printed by `serve`
 
-## 3) Play
+### 3) GitHub Pages deployment
 
-1. Default dataset path is `data/glove.2024.wikigiga.50d.top14000.txt` (small).
-2. The game auto-loads the default dataset on page open.
-3. Use **Load big dataset (medium, 50k)** to switch and load `data/glove.2024.wikigiga.50d.top50000.txt`.
-4. Enter a guess from autocomplete and submit.
-5. By default the game starts with `n=1` and increments `n` each new round.
-6. Open **Setup** to change dataset path, set manual `n`, or disable auto-increment.
+This repo includes a workflow at `.github/workflows/deploy-pages.yml` that deploys the `web/` folder on pushes to `main`.
 
-Scoring:
-- `Score: points / rounds`
-- Distances are cosine distances (`1 - cosine similarity`).
-- You gain **1 point for each "Your word"** that is nearer than the nearest "Enemy word".
-- Results are shown directly on the board:
-	- Green = well done
-	- Red = not well done
+One-time GitHub setup:
+1. Create a GitHub repository and push this project.
+2. In GitHub: **Settings → Pages → Source = GitHub Actions**.
+3. Ensure the workflow has permission to deploy pages (default for personal repos is usually enough).
+4. Push to `main`; the Pages site will be published from the workflow.
