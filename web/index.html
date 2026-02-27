@@ -87,6 +87,14 @@
         <tbody id="historyBody"></tbody>
       </table>
     </section>
+
+    <section class="panel">
+      <h2>About GloVe embeddings</h2>
+      <p>GloVe (Global Vectors for Word Representation) represents each word as a fixed-size vector of numbers.</p>
+      <p>These vectors are learned from very large text corpora by counting how often words appear with other words in many contexts, then fitting vectors so their dot products capture those global co-occurrence patterns.</p>
+      <p>Words used in similar contexts end up near each other in vector space, which is why cosine distance can be used here to score guesses against your words and enemy words.</p>
+      <p>Learn more: <a href="https://nlp.stanford.edu/projects/glove/" target="_blank" rel="noopener noreferrer">https://nlp.stanford.edu/projects/glove/</a></p>
+    </section>
   </main>
 
   <script src="app.js"></script>

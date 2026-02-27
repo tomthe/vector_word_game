@@ -43,3 +43,20 @@ This generates dataset files in `web/data/`, including:
 ### 2) GitHub Pages deployment
 
 This repo includes a workflow at `.github/workflows/deploy-pages.yml` that deploys the `web/` folder on pushes to `main`.
+
+## Further reading: GitHub + GloVe
+
+GitHub repository:
+[https://github.com/tomthe/vector_word_game](https://github.com/tomthe/vector_word_game)
+
+What are GloVe embeddings?
+- GloVe (Global Vectors for Word Representation) maps each word to a fixed-size numeric vector.
+- GloVe is trained on very large text corpora by counting how often words co-occur with other words across many contexts.
+- The training objective fits vectors so their dot products reflect global co-occurrence statistics (for example, ratios of how often words appear with shared context words).
+- Because of this, words that appear in similar contexts get vectors that are close to each other in vector space.
+- In this game, each guess is compared against "Your words" and "Enemy words" using cosine distance.
+- A good guess is closer to your target words and farther away from enemy words.
+- The reduced files in `web/data/` are trimmed subsets of the original Stanford GloVe release, so loading stays fast in the browser. We only use the most common english words.
+
+Official GloVe project page:
+[https://nlp.stanford.edu/projects/glove/](https://nlp.stanford.edu/projects/glove/)
