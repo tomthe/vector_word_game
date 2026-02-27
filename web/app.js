@@ -12,10 +12,14 @@ const state = {
   history: [],
 };
 
+const SMALL_DATASET_PATH = "data/glove.2024.wikigiga.50d.top14000.txt";
+const MEDIUM_DATASET_PATH = "data/glove.2024.wikigiga.50d.top50000.txt";
+
 const datasetPathInput = document.getElementById("datasetPath");
 const wordCountInput = document.getElementById("wordCount");
 const autoIncrementInput = document.getElementById("autoIncrement");
 const loadBtn = document.getElementById("loadBtn");
+const loadMediumBtn = document.getElementById("loadMediumBtn");
 const newRoundBtn = document.getElementById("newRoundBtn");
 const submitBtn = document.getElementById("submitBtn");
 const guessInput = document.getElementById("guessInput");
@@ -134,6 +138,11 @@ async function loadEmbeddings() {
   } finally {
     loadBtn.disabled = false;
   }
+}
+
+function loadMediumEmbeddings() {
+  datasetPathInput.value = MEDIUM_DATASET_PATH;
+  return loadEmbeddings();
 }
 
 function hideSuggestions() {
@@ -435,6 +444,7 @@ function renderHistory() {
 }
 
 loadBtn.addEventListener("click", loadEmbeddings);
+loadMediumBtn.addEventListener("click", loadMediumEmbeddings);
 newRoundBtn.addEventListener("click", startRound);
 submitBtn.addEventListener("click", submitGuess);
 
@@ -507,4 +517,7 @@ guessInput.addEventListener("keydown", (event) => {
 });
 
 updateScore();
+if (!datasetPathInput.value.trim()) {
+  datasetPathInput.value = SMALL_DATASET_PATH;
+}
 loadEmbeddings();

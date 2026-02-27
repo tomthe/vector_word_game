@@ -8,17 +8,16 @@
 </head>
 <body>
   <main class="container">
-    <h1>Vector Codenames</h1>
+    <h1>Vector Code Words</h1>
     <p class="subtitle">Pick a word that is "nearer" to "your words" than to the "enemy words"!</p>
 
     <section class="panel">
-      <h2>Play</h2>
       <details>
-        <summary>Setup</summary>
+        <h2></h2><summary>Setup</summary></h2>
         <div class="row">
           <label for="datasetPath">Dataset path</label>
-          <input id="datasetPath" type="text" value="data/glove.2024.wikigiga.50d.top20000.txt" />
-        </div>
+          <input id="datasetPath" type="text" value="data/glove.2024.wikigiga.50d.top14000.txt" />
+        
         <div class="row two-col">
           <div>
             <label for="wordCount">Words per side (n)</label>
@@ -29,15 +28,16 @@
             <input id="autoIncrement" type="checkbox" checked />
           </div>
         </div>
+        <div class="row actions">
+            <button id="loadBtn">Reload embeddings</button>
+            <button id="loadMediumBtn">Load big dataset (medium, 50k)</button>
+        </div>
+        <p id="status" class="status">Loading default small dataset...</p>
       </details>
-      <div class="row actions">
-        <button id="loadBtn">Reload embeddings</button>
-      </div>
-      <p id="status" class="status">Loading default dataset...</p>
     </section>
 
     <section class="panel board">
-      <h2>Board</h2>
+      <!-- <h2>Board</h2> -->
       <div class="columns">
         <div>
           <h3>Your words</h3>
