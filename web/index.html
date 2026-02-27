@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vector Codenames</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>Vector Codenames</h1>
+    <p class="subtitle">Pick a word that is "nearer" to "your words" than to the "enemy words"!</p>
+
+    <section class="panel">
+      <h2>Play</h2>
+      <details>
+        <summary>Setup</summary>
+        <div class="row">
+          <label for="datasetPath">Dataset path</label>
+          <input id="datasetPath" type="text" value="data/glove.2024.wikigiga.50d.top20000.txt" />
+        </div>
+        <div class="row two-col">
+          <div>
+            <label for="wordCount">Words per side (n)</label>
+            <input id="wordCount" type="number" min="1" max="10" value="1" />
+          </div>
+          <div>
+            <label for="autoIncrement">Auto-increment n per round</label>
+            <input id="autoIncrement" type="checkbox" checked />
+          </div>
+        </div>
+      </details>
+      <div class="row actions">
+        <button id="loadBtn">Reload embeddings</button>
+      </div>
+      <p id="status" class="status">Loading default dataset...</p>
+    </section>
+
+    <section class="panel board">
+      <h2>Board</h2>
+      <div class="columns">
+        <div>
+          <h3>Your words</h3>
+          <ul id="leftWords"></ul>
+        </div>
+        <div>
+          <h3>Enemy words</h3>
+          <ul id="rightWords"></ul>
+        </div>
+      </div>
+      <p id="score" class="score">Score: 0 / 0</p>
+    </section>
+
+    <section class="panel">
+      <h2>Pick a word</h2>
+      <p class="hint">Start typing and tap a suggestion from the list. Not every word is in the dataset. Pick a word that is "nearer" to "your words" than to the "enemy words"!</p>
+      <div class="row">
+        <label for="guessInput">Your word</label>
+        <input id="guessInput" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Type a known word" disabled />
+        <ul id="guessSuggestions" class="suggestions" role="listbox" aria-label="Word suggestions"></ul>
+      </div>
+      <div class="row actions">
+        <button id="submitBtn" disabled>Submit guess</button>
+        <button id="newRoundBtn" disabled>Next round</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Result</h2>
+      <p id="roundResult">No guess yet.</p>
+      <p id="nearestEnemy">Nearest enemy distance: -</p>
+    </section>
+
+    <section class="panel">
+      <h2>Round history</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Round</th>
+            <th>n</th>
+            <th>Guess</th>
+            <th>Points</th>
+            <th>Your words</th>
+            <th>Enemy words</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
