@@ -5,8 +5,8 @@ Single-player browser game using word embeddings.
 
 ## For players
 
-- Play online (after GitHub Pages is enabled):
-  - `https://tomthe.github.io/vector_word_game`
+Play online:
+[https://tomthe.github.io/vector_word_game](https://tomthe.github.io/vector_word_game)
 
 How to play:
 1. You see two groups of words: Yours and "Enemy words"
