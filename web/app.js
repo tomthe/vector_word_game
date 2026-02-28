@@ -22,6 +22,13 @@ const DEFAULT_SMALL_DATASET_BY_LANG = {
   de: DE_SMALL_DATASET_PATH,
 };
 
+const DATASET_PRESETS = [
+  { id: "en-small", lang: "en", size: "small", path: SMALL_DATASET_PATH },
+  { id: "en-medium", lang: "en", size: "medium", path: MEDIUM_DATASET_PATH },
+  { id: "de-small", lang: "de", size: "small", path: DE_SMALL_DATASET_PATH },
+  { id: "de-medium", lang: "de", size: "medium", path: DE_MEDIUM_DATASET_PATH },
+];
+
 const I18N = {
   en: {
     title: "Vector Code Words",
@@ -29,6 +36,12 @@ const I18N = {
     setupSummary: "Setup",
     languageLabel: "Language",
     datasetPathLabel: "Dataset path",
+    datasetPresetLabel: "Dataset preset",
+    datasetPresetEnSmall: "English small (14k)",
+    datasetPresetEnMedium: "English medium (50k)",
+    datasetPresetDeSmall: "German small (14k)",
+    datasetPresetDeMedium: "German medium (50k)",
+    datasetPresetCustom: "Custom path",
     wordsPerSideLabel: "Words per side (n)",
     autoIncrementLabel: "Auto-increment n per round",
     reloadEmbeddingsBtn: "Reload embeddings",
@@ -76,6 +89,12 @@ const I18N = {
     setupSummary: "Einstellungen",
     languageLabel: "Sprache",
     datasetPathLabel: "Datensatz-Pfad",
+    datasetPresetLabel: "Datensatz-Vorgabe",
+    datasetPresetEnSmall: "Englisch klein (14k)",
+    datasetPresetEnMedium: "Englisch mittel (50k)",
+    datasetPresetDeSmall: "Deutsch klein (14k)",
+    datasetPresetDeMedium: "Deutsch mittel (50k)",
+    datasetPresetCustom: "Eigener Pfad",
     wordsPerSideLabel: "Wörter pro Seite (n)",
     autoIncrementLabel: "n pro Runde automatisch erhöhen",
     reloadEmbeddingsBtn: "Embeddings neu laden",
@@ -120,6 +139,7 @@ const I18N = {
 };
 
 const datasetPathInput = document.getElementById("datasetPath");
+const datasetPresetSelect = document.getElementById("datasetPreset");
 const languageSelect = document.getElementById("languageSelect");
 const wordCountInput = document.getElementById("wordCount");
 const autoIncrementInput = document.getElementById("autoIncrement");
@@ -142,6 +162,7 @@ let currentSuggestions = [];
 let highlightedSuggestionIndex = -1;
 let hideSuggestionsTimer = null;
 let currentLanguage = "en";
+let lastSubmittedGuess = "";
 
 function t(key, values = {}) {
   const langPack = I18N[currentLanguage] || I18N.en;
@@ -172,6 +193,53 @@ function applyStaticTranslations() {
   }
 }
 
+function getPresetLabelKey(presetId) {
+  if (presetId === "en-small") return "datasetPresetEnSmall";
+  if (presetId === "en-medium") return "datasetPresetEnMedium";
+  if (presetId === "de-small") return "datasetPresetDeSmall";
+  if (presetId === "de-medium") return "datasetPresetDeMedium";
+  return "datasetPresetCustom";
+}
+
+function syncDatasetPresetWithPath() {
+  const path = datasetPathInput.value.trim();
+  const matchedPreset = DATASET_PRESETS.find((preset) => preset.path === path);
+
+  const customOption = datasetPresetSelect.querySelector("option[value='__custom__']");
+  if (customOption) {
+    customOption.remove();
+  }
+
+  if (matchedPreset) {
+    datasetPresetSelect.value = matchedPreset.id;
+    return;
+  }
+
+  const option = document.createElement("option");
+  option.value = "__custom__";
+  option.textContent = t("datasetPresetCustom");
+  datasetPresetSelect.appendChild(option);
+  datasetPresetSelect.value = "__custom__";
+}
+
+function rebuildDatasetPresetOptions() {
+  const currentPath = datasetPathInput.value.trim();
+  datasetPresetSelect.innerHTML = "";
+
+  for (const preset of DATASET_PRESETS) {
+    const option = document.createElement("option");
+    option.value = preset.id;
+    option.textContent = t(getPresetLabelKey(preset.id));
+    datasetPresetSelect.appendChild(option);
+  }
+
+  if (!currentPath) {
+    datasetPathInput.value = DEFAULT_SMALL_DATASET_BY_LANG[currentLanguage];
+  }
+
+  syncDatasetPresetWithPath();
+}
+
 function setLanguage(nextLanguage) {
   const previousLanguage = currentLanguage;
   currentLanguage = I18N[nextLanguage] ? nextLanguage : "en";
@@ -184,6 +252,7 @@ function setLanguage(nextLanguage) {
   }
 
   applyStaticTranslations();
+  rebuildDatasetPresetOptions();
   updateScore();
 
   if (!state.history.length) {
@@ -298,6 +367,7 @@ async function loadEmbeddings() {
 
 function loadMediumEmbeddings() {
   datasetPathInput.value = currentLanguage === "de" ? DE_MEDIUM_DATASET_PATH : MEDIUM_DATASET_PATH;
+  syncDatasetPresetWithPath();
   return loadEmbeddings();
 }
 
@@ -427,6 +497,7 @@ function startRound() {
     resultEl.textContent = t("noGuessYet");
     nearestEnemyEl.textContent = t("nearestEnemyDistanceEmpty");
     guessInput.value = "";
+    lastSubmittedGuess = "";
     state.pendingIncrement = false;
     submitBtn.disabled = false;
     newRoundBtn.disabled = false;
@@ -508,6 +579,11 @@ function submitGuess() {
     return;
   }
 
+  if (state.pendingIncrement && canonicalGuess === lastSubmittedGuess) {
+    startRound();
+    return;
+  }
+
   guessInput.value = canonicalGuess;
 
   const leftDistancesByWord = new Map();
@@ -564,6 +640,7 @@ function submitGuess() {
   });
 
   state.pendingIncrement = true;
+  lastSubmittedGuess = canonicalGuess;
   setStatus(t("statusRoundScored"));
 }
 
@@ -608,6 +685,17 @@ newRoundBtn.addEventListener("click", startRound);
 submitBtn.addEventListener("click", submitGuess);
 languageSelect.addEventListener("change", () => {
   setLanguage(languageSelect.value);
+});
+datasetPresetSelect.addEventListener("change", () => {
+  const selectedPreset = DATASET_PRESETS.find((preset) => preset.id === datasetPresetSelect.value);
+  if (!selectedPreset) {
+    return;
+  }
+
+  datasetPathInput.value = selectedPreset.path;
+});
+datasetPathInput.addEventListener("input", () => {
+  syncDatasetPresetWithPath();
 });
 
 guessSuggestionsEl.addEventListener("pointerdown", (event) => {
@@ -683,4 +771,5 @@ if (!datasetPathInput.value.trim()) {
   datasetPathInput.value = DEFAULT_SMALL_DATASET_BY_LANG[currentLanguage];
 }
 setLanguage(languageSelect.value || "en");
+syncDatasetPresetWithPath();
 loadEmbeddings();
