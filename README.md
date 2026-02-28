@@ -8,6 +8,8 @@ Single-player browser game using word embeddings.
 Play online:
 [https://tomthe.github.io/vector_word_game](https://tomthe.github.io/vector_word_game)
 
+The game UI supports English and German (`Language` selector in setup).
+
 How to play:
 1. You see two groups of words: Yours and "Enemy words"
 2. Guess a word that is "nearer" to your words than to all the enemy words
@@ -21,9 +23,11 @@ Scoring:
 
 ## Embeddings
 
-This project uses Glove embeddings from https://nlp.stanford.edu/projects/glove/
+This project uses:
+- GloVe embeddings (English): https://nlp.stanford.edu/projects/glove/
+- fastText Common Crawl embeddings (German): https://fasttext.cc/docs/en/crawl-vectors.html
 
-If you want to reproduce this, you have to download them from there.
+If you want to reproduce this, download the source files from those pages.
 
 ## Development
 
@@ -35,9 +39,26 @@ From the workspace root:
 .\scripts\filter_embeddings.ps1
 ```
 
-This generates dataset files in `web/data/`, including:
+This generates dataset files in `web/data/` for any available source files (English and/or German), including:
 - `glove.2024.wikigiga.50d.top14000.txt`
 - `glove.2024.wikigiga.50d.top50000.txt`
+- `cc.de.300.top14000.txt`
+- `cc.de.300.top50000.txt`
+
+German source defaults to `cc.de.300.vec.gz` in the repository root.
+
+Useful options:
+
+```powershell
+# Build only German fastText subsets
+.\scripts\filter_embeddings.ps1 -SkipEnglish
+
+# Build only English GloVe subsets
+.\scripts\filter_embeddings.ps1 -SkipGerman
+
+# Custom German source path
+.\scripts\filter_embeddings.ps1 -GermanVecGzPath "D:\downloads\cc.de.300.vec.gz" -SkipEnglish
+```
 
 
 ### 2) GitHub Pages deployment
@@ -56,7 +77,10 @@ What are GloVe embeddings?
 - Because of this, words that appear in similar contexts get vectors that are close to each other in vector space.
 - In this game, each guess is compared against "Your words" and "Enemy words" using cosine distance.
 - A good guess is closer to your target words and farther away from enemy words.
-- The reduced files in `web/data/` are trimmed subsets of the original Stanford GloVe release, so loading stays fast in the browser. We only use the most common english words.
+- The reduced files in `web/data/` are trimmed subsets of the original vector sources, so loading stays fast in the browser.
 
 Official GloVe project page:
 [https://nlp.stanford.edu/projects/glove/](https://nlp.stanford.edu/projects/glove/)
+
+Official fastText vectors page:
+[https://fasttext.cc/docs/en/crawl-vectors.html](https://fasttext.cc/docs/en/crawl-vectors.html)

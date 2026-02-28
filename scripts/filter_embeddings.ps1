@@ -6,7 +6,14 @@ param(
     [int]$SmallTopN = 14000,
     [string]$SmallOutputPath = "web/data/glove.2024.wikigiga.50d.top14000.txt",
     [int]$MediumTopN = 50000,
-    [string]$MediumOutputPath = "web/data/glove.2024.wikigiga.50d.top50000.txt"
+    [string]$MediumOutputPath = "web/data/glove.2024.wikigiga.50d.top50000.txt",
+    [string]$GermanVecGzPath = "cc.de.300.vec.gz",
+    [int]$GermanSmallTopN = 14000,
+    [string]$GermanSmallOutputPath = "web/data/cc.de.300.top14000.txt",
+    [int]$GermanMediumTopN = 50000,
+    [string]$GermanMediumOutputPath = "web/data/cc.de.300.top50000.txt",
+    [switch]$SkipEnglish,
+    [switch]$SkipGerman
 )
 
 Set-StrictMode -Version Latest
@@ -156,20 +163,123 @@ function Write-FilteredEmbeddings {
     }
 }
 
+function Write-TopFastTextFromGzip {
+    param(
+        [string]$GzipFile,
+        [int]$Count,
+        [string]$DestinationPath
+    )
+
+    if ($Count -le 0) {
+        throw "Count must be > 0 for destination '$DestinationPath'."
+    }
+
+    $resolvedInput = Resolve-Path -LiteralPath $GzipFile
+    $resolvedOutput = Join-Path -Path (Get-Location) -ChildPath $DestinationPath
+    $outputDir = Split-Path -Path $resolvedOutput -Parent
+    if (-not (Test-Path -LiteralPath $outputDir)) {
+        New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+    }
+
+    $inStream = [System.IO.File]::OpenRead($resolvedInput)
+    $gzipStream = New-Object System.IO.Compression.GzipStream($inStream, [System.IO.Compression.CompressionMode]::Decompress)
+    $reader = New-Object System.IO.StreamReader($gzipStream)
+
+    $outStream = [System.IO.File]::Open($resolvedOutput, [System.IO.FileMode]::Create, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+    $writer = New-Object System.IO.StreamWriter($outStream)
+
+    try {
+        $writer.NewLine = "`n"
+
+        $seen = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+        $kept = 0
+        $headerSkipped = $false
+
+        while (-not $reader.EndOfStream -and $kept -lt $Count) {
+            $line = $reader.ReadLine()
+            if ([string]::IsNullOrWhiteSpace($line)) {
+                continue
+            }
+
+            if (-not $headerSkipped -and $line -match '^\d+\s+\d+$') {
+                $headerSkipped = $true
+                continue
+            }
+
+            $headerSkipped = $true
+
+            $spaceIndex = $line.IndexOf(' ')
+            if ($spaceIndex -le 0) {
+                continue
+            }
+
+            $word = $line.Substring(0, $spaceIndex)
+            if ($seen.Add($word)) {
+                $writer.WriteLine($line)
+                $kept++
+            }
+        }
+
+        if ($kept -eq 0) {
+            throw "No vectors were written from '$GzipFile'."
+        }
+
+        Write-Host "Wrote $kept fastText embeddings to $resolvedOutput"
+        if ($kept -lt $Count) {
+            Write-Host "Warning: requested $Count vectors but only wrote $kept from '$GzipFile'."
+        }
+    }
+    finally {
+        $writer.Dispose()
+        $reader.Dispose()
+        $outStream.Dispose()
+        $gzipStream.Dispose()
+        $inStream.Dispose()
+    }
+}
+
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
-$smallTargetWords = Get-TopFrequencyWords -ZipFile $FrequencyZipPath -EntryName $FrequencyEntry -Count $SmallTopN
-if ($smallTargetWords.Count -eq 0) {
-    throw "No words loaded from frequency file for small dataset."
+$didBuildAny = $false
+
+if (-not $SkipEnglish) {
+    if ((Test-Path -LiteralPath $ZipPath) -and (Test-Path -LiteralPath $FrequencyZipPath)) {
+        $smallTargetWords = Get-TopFrequencyWords -ZipFile $FrequencyZipPath -EntryName $FrequencyEntry -Count $SmallTopN
+        if ($smallTargetWords.Count -eq 0) {
+            throw "No words loaded from frequency file for small English dataset."
+        }
+
+        $mediumTargetWords = Get-TopFrequencyWords -ZipFile $FrequencyZipPath -EntryName $FrequencyEntry -Count $MediumTopN
+        if ($mediumTargetWords.Count -eq 0) {
+            throw "No words loaded from frequency file for medium English dataset."
+        }
+
+        Write-Host "Building English small dataset ($SmallTopN words)..."
+        Write-FilteredEmbeddings -ZipFile $ZipPath -EntryName $SourceEntry -TargetWords $smallTargetWords -DestinationPath $SmallOutputPath
+
+        Write-Host "Building English medium dataset ($MediumTopN words)..."
+        Write-FilteredEmbeddings -ZipFile $ZipPath -EntryName $SourceEntry -TargetWords $mediumTargetWords -DestinationPath $MediumOutputPath
+        $didBuildAny = $true
+    }
+    else {
+        Write-Host "Skipping English build: missing '$ZipPath' or '$FrequencyZipPath'."
+    }
 }
 
-$mediumTargetWords = Get-TopFrequencyWords -ZipFile $FrequencyZipPath -EntryName $FrequencyEntry -Count $MediumTopN
-if ($mediumTargetWords.Count -eq 0) {
-    throw "No words loaded from frequency file for medium dataset."
+if (-not $SkipGerman) {
+    if (Test-Path -LiteralPath $GermanVecGzPath) {
+        Write-Host "Building German small dataset ($GermanSmallTopN words)..."
+        Write-TopFastTextFromGzip -GzipFile $GermanVecGzPath -Count $GermanSmallTopN -DestinationPath $GermanSmallOutputPath
+
+        Write-Host "Building German medium dataset ($GermanMediumTopN words)..."
+        Write-TopFastTextFromGzip -GzipFile $GermanVecGzPath -Count $GermanMediumTopN -DestinationPath $GermanMediumOutputPath
+        $didBuildAny = $true
+    }
+    else {
+        Write-Host "Skipping German build: file not found '$GermanVecGzPath'."
+    }
 }
 
-Write-Host "Building small dataset ($SmallTopN words)..."
-Write-FilteredEmbeddings -ZipFile $ZipPath -EntryName $SourceEntry -TargetWords $smallTargetWords -DestinationPath $SmallOutputPath
-
-Write-Host "Building medium dataset ($MediumTopN words)..."
-Write-FilteredEmbeddings -ZipFile $ZipPath -EntryName $SourceEntry -TargetWords $mediumTargetWords -DestinationPath $MediumOutputPath
+if (-not $didBuildAny) {
+    throw "No datasets were built. Provide source files or disable skipped pipelines with -SkipEnglish / -SkipGerman."
+}

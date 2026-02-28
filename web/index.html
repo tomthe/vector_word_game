@@ -8,31 +8,38 @@
 </head>
 <body>
   <main class="container">
-    <h1>Vector Code Words</h1>
-    <p class="subtitle">Pick a word that is "nearer" to "your words" than to the "enemy words"!</p>
+    <h1 data-i18n="title">Vector Code Words</h1>
+    <p class="subtitle" data-i18n="subtitle">Pick a word that is "nearer" to "your words" than to the "enemy words"!</p>
 
     <section class="panel">
       <details>
-        <h2></h2><summary>Setup</summary></h2>
+        <summary data-i18n="setupSummary">Setup</summary>
         <div class="row">
-          <label for="datasetPath">Dataset path</label>
+          <label for="languageSelect" data-i18n="languageLabel">Language</label>
+          <select id="languageSelect">
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+          </select>
+        </div>
+        <div class="row">
+          <label for="datasetPath" data-i18n="datasetPathLabel">Dataset path</label>
           <input id="datasetPath" type="text" value="data/glove.2024.wikigiga.50d.top14000.txt" />
-        
+        </div>
         <div class="row two-col">
           <div>
-            <label for="wordCount">Words per side (n)</label>
+            <label for="wordCount" data-i18n="wordsPerSideLabel">Words per side (n)</label>
             <input id="wordCount" type="number" min="1" max="10" value="1" />
           </div>
           <div>
-            <label for="autoIncrement">Auto-increment n per round</label>
+            <label for="autoIncrement" data-i18n="autoIncrementLabel">Auto-increment n per round</label>
             <input id="autoIncrement" type="checkbox" checked />
           </div>
         </div>
         <div class="row actions">
-            <button id="loadBtn">Reload embeddings</button>
-            <button id="loadMediumBtn">Load big dataset (medium, 50k)</button>
+            <button id="loadBtn" data-i18n="reloadEmbeddingsBtn">Reload embeddings</button>
+            <button id="loadMediumBtn" data-i18n="loadBigDatasetBtn">Load big dataset (medium, 50k)</button>
         </div>
-        <p id="status" class="status">Loading default small dataset...</p>
+        <p id="status" class="status" data-i18n="statusLoadingDefault">Loading default small dataset...</p>
       </details>
     </section>
 
@@ -40,11 +47,11 @@
       <!-- <h2>Board</h2> -->
       <div class="columns">
         <div>
-          <h3>Your words</h3>
+          <h3 data-i18n="yourWordsTitle">Your words</h3>
           <ul id="leftWords"></ul>
         </div>
         <div>
-          <h3>Enemy words</h3>
+          <h3 data-i18n="enemyWordsTitle">Enemy words</h3>
           <ul id="rightWords"></ul>
         </div>
       </div>
@@ -52,36 +59,36 @@
     </section>
 
     <section class="panel">
-      <h2>Pick a word</h2>
-      <p class="hint">Start typing and tap a suggestion from the list. Not every word is in the dataset. Pick a word that is "nearer" to "your words" than to the "enemy words"!</p>
+      <h2 data-i18n="pickWordTitle">Pick a word</h2>
+      <p class="hint" data-i18n="pickWordHint">Start typing and tap a suggestion from the list. Not every word is in the dataset. Pick a word that is "nearer" to "your words" than to the "enemy words"!</p>
       <div class="row">
-        <label for="guessInput">Your word</label>
-        <input id="guessInput" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Type a known word" disabled />
-        <ul id="guessSuggestions" class="suggestions" role="listbox" aria-label="Word suggestions"></ul>
+        <label for="guessInput" data-i18n="yourWordLabel">Your word</label>
+        <input id="guessInput" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Type a known word" data-i18n-placeholder="guessPlaceholder" disabled />
+        <ul id="guessSuggestions" class="suggestions" role="listbox" aria-label="Word suggestions" data-i18n-aria-label="wordSuggestionsAria"></ul>
       </div>
       <div class="row actions">
-        <button id="submitBtn" disabled>Submit guess</button>
-        <button id="newRoundBtn" disabled>Next round</button>
+        <button id="submitBtn" data-i18n="submitGuessBtn" disabled>Submit guess</button>
+        <button id="newRoundBtn" data-i18n="nextRoundBtn" disabled>Next round</button>
       </div>
     </section>
 
     <section class="panel">
-      <h2>Result</h2>
-      <p id="roundResult">No guess yet.</p>
+      <h2 data-i18n="resultTitle">Result</h2>
+      <p id="roundResult" data-i18n="noGuessYet">No guess yet.</p>
       <p id="nearestEnemy">Nearest enemy distance: -</p>
     </section>
 
     <section class="panel">
-      <h2>Round history</h2>
+      <h2 data-i18n="roundHistoryTitle">Round history</h2>
       <table>
         <thead>
           <tr>
-            <th>Round</th>
+            <th data-i18n="historyRound">Round</th>
             <th>n</th>
-            <th>Guess</th>
-            <th>Points</th>
-            <th>Your words</th>
-            <th>Enemy words</th>
+            <th data-i18n="historyGuess">Guess</th>
+            <th data-i18n="historyPoints">Points</th>
+            <th data-i18n="historyYourWords">Your words</th>
+            <th data-i18n="historyEnemyWords">Enemy words</th>
           </tr>
         </thead>
         <tbody id="historyBody"></tbody>
@@ -89,11 +96,11 @@
     </section>
 
     <section class="panel">
-      <h2>About GloVe embeddings</h2>
-      <p>GloVe (Global Vectors for Word Representation) represents each word as a fixed-size vector of numbers.</p>
-      <p>These vectors are learned from very large text corpora by counting how often words appear with other words in many contexts, then fitting vectors so their dot products capture those global co-occurrence patterns.</p>
-      <p>Words used in similar contexts end up near each other in vector space, which is why cosine distance can be used here to score guesses against your words and enemy words.</p>
-      <p>Learn more: <a href="https://nlp.stanford.edu/projects/glove/" target="_blank" rel="noopener noreferrer">https://nlp.stanford.edu/projects/glove/</a></p>
+      <h2 data-i18n="aboutEmbeddingsTitle">About word embeddings</h2>
+      <p data-i18n="aboutEmbeddingsP1">Word embeddings represent each word as a fixed-size vector of numbers.</p>
+      <p data-i18n="aboutEmbeddingsP2">These vectors are learned from very large text corpora by counting how often words appear with other words in many contexts, then fitting vectors so their dot products capture global co-occurrence patterns.</p>
+      <p data-i18n="aboutEmbeddingsP3">Words used in similar contexts end up near each other in vector space, which is why cosine distance can be used here to score guesses against your words and enemy words.</p>
+      <p><span data-i18n="learnMore">Learn more</span>: <a href="https://nlp.stanford.edu/projects/glove/" target="_blank" rel="noopener noreferrer">GloVe</a>, <a href="https://fasttext.cc/docs/en/crawl-vectors.html" target="_blank" rel="noopener noreferrer">fastText</a></p>
     </section>
   </main>
 

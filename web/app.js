@@ -14,8 +14,113 @@ const state = {
 
 const SMALL_DATASET_PATH = "data/glove.2024.wikigiga.50d.top14000.txt";
 const MEDIUM_DATASET_PATH = "data/glove.2024.wikigiga.50d.top50000.txt";
+const DE_SMALL_DATASET_PATH = "data/cc.de.300.top14000.txt";
+const DE_MEDIUM_DATASET_PATH = "data/cc.de.300.top50000.txt";
+
+const DEFAULT_SMALL_DATASET_BY_LANG = {
+  en: SMALL_DATASET_PATH,
+  de: DE_SMALL_DATASET_PATH,
+};
+
+const I18N = {
+  en: {
+    title: "Vector Code Words",
+    subtitle: "Pick a word that is \"nearer\" to \"your words\" than to the \"enemy words\"!",
+    setupSummary: "Setup",
+    languageLabel: "Language",
+    datasetPathLabel: "Dataset path",
+    wordsPerSideLabel: "Words per side (n)",
+    autoIncrementLabel: "Auto-increment n per round",
+    reloadEmbeddingsBtn: "Reload embeddings",
+    loadBigDatasetBtn: "Load big dataset (medium, 50k)",
+    statusLoadingDefault: "Loading default small dataset...",
+    yourWordsTitle: "Your words",
+    enemyWordsTitle: "Enemy words",
+    pickWordTitle: "Pick a word",
+    pickWordHint: "Start typing and tap a suggestion from the list. Not every word is in the dataset. Pick a word that is \"nearer\" to \"your words\" than to the \"enemy words\"!",
+    yourWordLabel: "Your word",
+    guessPlaceholder: "Type a known word",
+    wordSuggestionsAria: "Word suggestions",
+    submitGuessBtn: "Submit guess",
+    nextRoundBtn: "Next round",
+    resultTitle: "Result",
+    noGuessYet: "No guess yet.",
+    roundHistoryTitle: "Round history",
+    historyRound: "Round",
+    historyGuess: "Guess",
+    historyPoints: "Points",
+    historyYourWords: "Your words",
+    historyEnemyWords: "Enemy words",
+    aboutEmbeddingsTitle: "About word embeddings",
+    aboutEmbeddingsP1: "Word embeddings represent each word as a fixed-size vector of numbers.",
+    aboutEmbeddingsP2: "These vectors are learned from very large text corpora by counting how often words appear with other words in many contexts, then fitting vectors so their dot products capture global co-occurrence patterns.",
+    aboutEmbeddingsP3: "Words used in similar contexts end up near each other in vector space, which is why cosine distance can be used here to score guesses against your words and enemy words.",
+    learnMore: "Learn more",
+    score: ({ points, rounds }) => `Score: ${points} / ${rounds}`,
+    statusDatasetEmpty: "Dataset path is empty.",
+    statusLoadingEmbeddings: "Loading embeddings...",
+    statusLoadedWords: ({ count }) => `Loaded ${count} words.`,
+    statusFailedToLoad: ({ message }) => `Failed to load embeddings: ${message}`,
+    statusRoundReady: "Round ready. Enter your guess.",
+    statusCannotStartRound: ({ message }) => `Cannot start round: ${message}`,
+    statusUnknownWord: "Unknown word. Pick a word from autocomplete.",
+    roundPoints: ({ points, total }) => `Round points: ${points} / ${total}`,
+    nearestEnemyDistance: ({ distance }) => `Nearest enemy distance: ${distance.toFixed(2)}`,
+    nearestEnemyDistanceEmpty: "Nearest enemy distance: -",
+    statusRoundScored: "Round scored. You can submit another guess or click 'Next round'.",
+    missingVector: "Missing vector for selected word.",
+  },
+  de: {
+    title: "Vektor-Codewörter",
+    subtitle: "Finde ein Wort, das näher an deinen Wörtern als an den Gegnerwörtern ist!",
+    setupSummary: "Einstellungen",
+    languageLabel: "Sprache",
+    datasetPathLabel: "Datensatz-Pfad",
+    wordsPerSideLabel: "Wörter pro Seite (n)",
+    autoIncrementLabel: "n pro Runde automatisch erhöhen",
+    reloadEmbeddingsBtn: "Embeddings neu laden",
+    loadBigDatasetBtn: "Großen Datensatz laden (mittel, 50k)",
+    statusLoadingDefault: "Standard-Datensatz wird geladen...",
+    yourWordsTitle: "Deine Wörter",
+    enemyWordsTitle: "Gegnerwörter",
+    pickWordTitle: "Wort wählen",
+    pickWordHint: "Tippe und wähle einen Vorschlag aus der Liste. Nicht jedes Wort ist im Datensatz. Dein Wort sollte näher an deinen Wörtern als an den Gegnerwörtern sein.",
+    yourWordLabel: "Dein Wort",
+    guessPlaceholder: "Bekanntes Wort eingeben",
+    wordSuggestionsAria: "Wortvorschläge",
+    submitGuessBtn: "Tipp abgeben",
+    nextRoundBtn: "Nächste Runde",
+    resultTitle: "Ergebnis",
+    noGuessYet: "Noch kein Tipp.",
+    roundHistoryTitle: "Rundenverlauf",
+    historyRound: "Runde",
+    historyGuess: "Tipp",
+    historyPoints: "Punkte",
+    historyYourWords: "Deine Wörter",
+    historyEnemyWords: "Gegnerwörter",
+    aboutEmbeddingsTitle: "Über Wort-Embeddings",
+    aboutEmbeddingsP1: "Wort-Embeddings repräsentieren jedes Wort als Vektor fester Länge.",
+    aboutEmbeddingsP2: "Diese Vektoren werden aus sehr großen Textkorpora gelernt, indem gezählt wird, wie oft Wörter in vielen Kontexten zusammen auftreten, und anschließend Vektoren angepasst werden, deren Skalarprodukte diese globalen Muster abbilden.",
+    aboutEmbeddingsP3: "Wörter mit ähnlichen Kontexten liegen im Vektorraum nahe beieinander. Deshalb kann hier die Kosinusdistanz zur Bewertung genutzt werden.",
+    learnMore: "Mehr dazu",
+    score: ({ points, rounds }) => `Punktestand: ${points} / ${rounds}`,
+    statusDatasetEmpty: "Datensatz-Pfad ist leer.",
+    statusLoadingEmbeddings: "Embeddings werden geladen...",
+    statusLoadedWords: ({ count }) => `${count} Wörter geladen.`,
+    statusFailedToLoad: ({ message }) => `Embeddings konnten nicht geladen werden: ${message}`,
+    statusRoundReady: "Runde bereit. Gib deinen Tipp ein.",
+    statusCannotStartRound: ({ message }) => `Runde kann nicht gestartet werden: ${message}`,
+    statusUnknownWord: "Unbekanntes Wort. Bitte aus der Autovervollständigung wählen.",
+    roundPoints: ({ points, total }) => `Rundenpunkte: ${points} / ${total}`,
+    nearestEnemyDistance: ({ distance }) => `Nächste Gegner-Distanz: ${distance.toFixed(2)}`,
+    nearestEnemyDistanceEmpty: "Nächste Gegner-Distanz: -",
+    statusRoundScored: "Runde gewertet. Du kannst erneut tippen oder auf 'Nächste Runde' klicken.",
+    missingVector: "Vektor für ausgewähltes Wort fehlt.",
+  },
+};
 
 const datasetPathInput = document.getElementById("datasetPath");
+const languageSelect = document.getElementById("languageSelect");
 const wordCountInput = document.getElementById("wordCount");
 const autoIncrementInput = document.getElementById("autoIncrement");
 const loadBtn = document.getElementById("loadBtn");
@@ -36,9 +141,60 @@ const MAX_SUGGESTIONS = 12;
 let currentSuggestions = [];
 let highlightedSuggestionIndex = -1;
 let hideSuggestionsTimer = null;
+let currentLanguage = "en";
+
+function t(key, values = {}) {
+  const langPack = I18N[currentLanguage] || I18N.en;
+  const template = langPack[key] ?? I18N.en[key] ?? key;
+  if (typeof template === "function") {
+    return template(values);
+  }
+  return template;
+}
+
+function applyStaticTranslations() {
+  const i18nNodes = document.querySelectorAll("[data-i18n]");
+  for (const node of i18nNodes) {
+    const key = node.getAttribute("data-i18n");
+    node.textContent = t(key);
+  }
+
+  const placeholderNodes = document.querySelectorAll("[data-i18n-placeholder]");
+  for (const node of placeholderNodes) {
+    const key = node.getAttribute("data-i18n-placeholder");
+    node.setAttribute("placeholder", t(key));
+  }
+
+  const ariaNodes = document.querySelectorAll("[data-i18n-aria-label]");
+  for (const node of ariaNodes) {
+    const key = node.getAttribute("data-i18n-aria-label");
+    node.setAttribute("aria-label", t(key));
+  }
+}
+
+function setLanguage(nextLanguage) {
+  const previousLanguage = currentLanguage;
+  currentLanguage = I18N[nextLanguage] ? nextLanguage : "en";
+
+  const previousDefaultPath = DEFAULT_SMALL_DATASET_BY_LANG[previousLanguage];
+  const nextDefaultPath = DEFAULT_SMALL_DATASET_BY_LANG[currentLanguage];
+  const datasetPath = datasetPathInput.value.trim();
+  if (!datasetPath || datasetPath === previousDefaultPath) {
+    datasetPathInput.value = nextDefaultPath;
+  }
+
+  applyStaticTranslations();
+  updateScore();
+
+  if (!state.history.length) {
+    resultEl.className = "";
+    resultEl.textContent = t("noGuessYet");
+    nearestEnemyEl.textContent = t("nearestEnemyDistanceEmpty");
+  }
+}
 
 function updateScore() {
-  scoreEl.textContent = `Score: ${state.points} / ${state.rounds}`;
+  scoreEl.textContent = t("score", { points: state.points, rounds: state.rounds });
 }
 
 function setStatus(message) {
@@ -83,12 +239,12 @@ function parseEmbeddingLine(line) {
 async function loadEmbeddings() {
   const datasetPath = datasetPathInput.value.trim();
   if (!datasetPath) {
-    setStatus("Dataset path is empty.");
+    setStatus(t("statusDatasetEmpty"));
     return;
   }
 
   loadBtn.disabled = true;
-  setStatus("Loading embeddings...");
+  setStatus(t("statusLoadingEmbeddings"));
 
   try {
     const response = await fetch(datasetPath);
@@ -131,17 +287,17 @@ async function loadEmbeddings() {
     guessInput.disabled = false;
     submitBtn.disabled = false;
 
-    setStatus(`Loaded ${state.words.length} words.`);
+    setStatus(t("statusLoadedWords", { count: state.words.length }));
     startRound();
   } catch (error) {
-    setStatus(`Failed to load embeddings: ${error.message}`);
+    setStatus(t("statusFailedToLoad", { message: error.message }));
   } finally {
     loadBtn.disabled = false;
   }
 }
 
 function loadMediumEmbeddings() {
-  datasetPathInput.value = MEDIUM_DATASET_PATH;
+  datasetPathInput.value = currentLanguage === "de" ? DE_MEDIUM_DATASET_PATH : MEDIUM_DATASET_PATH;
   return loadEmbeddings();
 }
 
@@ -268,15 +424,15 @@ function startRound() {
 
     renderBoard();
     resultEl.className = "";
-    resultEl.textContent = "No guess yet.";
-    nearestEnemyEl.textContent = "Nearest enemy distance: -";
+    resultEl.textContent = t("noGuessYet");
+    nearestEnemyEl.textContent = t("nearestEnemyDistanceEmpty");
     guessInput.value = "";
     state.pendingIncrement = false;
     submitBtn.disabled = false;
     newRoundBtn.disabled = false;
-    setStatus("Round ready. Enter your guess.");
+    setStatus(t("statusRoundReady"));
   } catch (error) {
-    setStatus(`Cannot start round: ${error.message}`);
+    setStatus(t("statusCannotStartRound", { message: error.message }));
   }
 }
 
@@ -328,7 +484,7 @@ function cosineDistance(wordA, wordB) {
   const normB = state.vectorNorms.get(wordB);
 
   if (!vectorA || !vectorB || !normA || !normB) {
-    throw new Error("Missing vector for selected word.");
+    throw new Error(t("missingVector"));
   }
 
   let dot = 0;
@@ -348,7 +504,7 @@ function submitGuess() {
   const guess = guessInput.value.trim();
   const canonicalGuess = resolveGuessWord(guess);
   if (!canonicalGuess || !state.vectors.has(canonicalGuess)) {
-    setStatus("Unknown word. Pick a word from autocomplete.");
+    setStatus(t("statusUnknownWord"));
     return;
   }
 
@@ -393,8 +549,11 @@ function submitGuess() {
   renderHistory();
 
   resultEl.className = nearerYourWords > 0 ? "result-good" : "result-bad";
-  resultEl.textContent = `Round points: ${nearerYourWords} / ${state.leftWords.length}`;
-  nearestEnemyEl.textContent = `Nearest enemy distance: ${minEnemyDistance.toFixed(2)}`;
+  resultEl.textContent = t("roundPoints", {
+    points: nearerYourWords,
+    total: state.leftWords.length,
+  });
+  nearestEnemyEl.textContent = t("nearestEnemyDistance", { distance: minEnemyDistance });
 
   renderBoard({
     leftDistancesByWord,
@@ -405,7 +564,7 @@ function submitGuess() {
   });
 
   state.pendingIncrement = true;
-  setStatus("Round scored. You can submit another guess or click 'Next round'.");
+  setStatus(t("statusRoundScored"));
 }
 
 function renderHistory() {
@@ -447,6 +606,9 @@ loadBtn.addEventListener("click", loadEmbeddings);
 loadMediumBtn.addEventListener("click", loadMediumEmbeddings);
 newRoundBtn.addEventListener("click", startRound);
 submitBtn.addEventListener("click", submitGuess);
+languageSelect.addEventListener("change", () => {
+  setLanguage(languageSelect.value);
+});
 
 guessSuggestionsEl.addEventListener("pointerdown", (event) => {
   const target = event.target.closest(".suggestion-item");
@@ -518,6 +680,7 @@ guessInput.addEventListener("keydown", (event) => {
 
 updateScore();
 if (!datasetPathInput.value.trim()) {
-  datasetPathInput.value = SMALL_DATASET_PATH;
+  datasetPathInput.value = DEFAULT_SMALL_DATASET_BY_LANG[currentLanguage];
 }
+setLanguage(languageSelect.value || "en");
 loadEmbeddings();
