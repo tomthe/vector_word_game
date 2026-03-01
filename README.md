@@ -2,6 +2,15 @@
 
 Single-player browser game using word embeddings.
 
+## Games
+
+- Classic game (near your words, away from enemy words):
+	- Online: [https://tomthe.github.io/vector_word_game/index.html](https://tomthe.github.io/vector_word_game/index.html)
+	- Local: `web/index.html`
+- Add-words game (vector equations with `+` and `-`):
+	- Online: [https://tomthe.github.io/vector_word_game/add-words.html](https://tomthe.github.io/vector_word_game/add-words.html)
+	- Local: `web/add-words.html`
+
 
 ## For players
 

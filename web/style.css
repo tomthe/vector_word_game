@@ -15,6 +15,27 @@ body {
   padding: 24px;
 }
 
+.game-nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.game-nav a {
+  display: inline-block;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 6px 10px;
+  text-decoration: none;
+  color: inherit;
+  background: #ffffff;
+  font-weight: 600;
+}
+
+.game-nav a[aria-current="page"] {
+  background: #f3f4f6;
+}
+
 h1 {
   margin: 0 0 8px;
 }
@@ -27,6 +48,13 @@ h1 {
   margin: 0 0 12px;
   color: #4b5563;
   font-size: 14px;
+}
+
+.equation {
+  margin: 0 0 10px;
+  font-size: 24px;
+  font-weight: 700;
+  word-break: break-word;
 }
 
 .panel {

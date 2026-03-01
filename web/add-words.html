@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vector Add-Words</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <nav class="game-nav" aria-label="Game navigation">
+      <a href="index.html">Classic game</a>
+      <a href="add-words.html" aria-current="page">Add-words</a>
+    </nav>
+
+    <h1>Vector Add-Words</h1>
+    <p class="subtitle">Solve word equations. Guess a word whose vector is close to the target equation result.</p>
+
+    <section class="panel">
+      <details>
+        <summary>Setup</summary>
+        <div class="row">
+          <label for="languageSelect">Language</label>
+          <select id="languageSelect">
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+          </select>
+        </div>
+        <div class="row">
+          <label for="datasetPath">Dataset path</label>
+          <input id="datasetPath" type="text" value="data/glove.2024.wikigiga.50d.top14000.txt" />
+        </div>
+        <div class="row">
+          <label for="datasetPreset">Dataset preset</label>
+          <select id="datasetPreset"></select>
+        </div>
+        <div class="row actions">
+          <button id="loadBtn">Reload embeddings</button>
+          <button id="loadMediumBtn">Load big dataset (medium)</button>
+        </div>
+        <p id="status" class="status">Loading default small dataset...</p>
+      </details>
+    </section>
+
+    <section class="panel">
+      <h2>Equation</h2>
+      <p id="equation" class="equation">-</p>
+      <p class="hint">Equation types rotate between: <strong>A + B</strong>, <strong>A + B - C</strong>, <strong>A - B + C</strong>, <strong>A - B - C</strong>.</p>
+      <div class="row actions">
+        <button id="newRoundBtn" disabled>New equation</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Your guess</h2>
+      <div class="row">
+        <label for="guessInput">Word</label>
+        <input id="guessInput" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Type a known word" disabled />
+        <ul id="guessSuggestions" class="suggestions" role="listbox" aria-label="Word suggestions"></ul>
+      </div>
+      <div class="row actions">
+        <button id="submitBtn" disabled>Submit guess</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Result</h2>
+      <p id="roundResult">No guess yet.</p>
+      <p id="distanceResult">Distance: -</p>
+      <p id="submittedDistance">Submitted word distance: -</p>
+      <ul id="comparisonDistances" class="distance-list"></ul>
+      <p id="score" class="score">Score: 0 / 0</p>
+    </section>
+
+    <section class="panel">
+      <h2>Round history</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Round</th>
+            <th>Equation</th>
+            <th>Guess</th>
+            <th>Distance</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="add-words.js"></script>
+</body>
+</html>
