@@ -35,6 +35,7 @@ const EQUATION_TYPES = [
 ];
 
 const MAX_SUGGESTIONS = 12;
+const ADDITIONAL_WORD_COUNT = 10;
 
 const datasetPathInput = document.getElementById("datasetPath");
 const datasetPresetSelect = document.getElementById("datasetPreset");
@@ -49,6 +50,8 @@ const equationEl = document.getElementById("equation");
 const statusEl = document.getElementById("status");
 const roundResultEl = document.getElementById("roundResult");
 const distanceResultEl = document.getElementById("distanceResult");
+const submittedDistanceEl = document.getElementById("submittedDistance");
+const comparisonDistancesEl = document.getElementById("comparisonDistances");
 const scoreEl = document.getElementById("score");
 const historyBodyEl = document.getElementById("historyBody");
 
@@ -56,6 +59,7 @@ let currentLanguage = "en";
 let currentSuggestions = [];
 let highlightedSuggestionIndex = -1;
 let hideSuggestionsTimer = null;
+let lastSubmittedGuess = "";
 
 function setStatus(message) {
   statusEl.textContent = message;
@@ -211,18 +215,18 @@ function loadMediumEmbeddings() {
   return loadEmbeddings();
 }
 
-function sampleWords(count) {
-  if (state.words.length < count) {
+function sampleWords(count, excluded = new Set()) {
+  const pool = state.words.filter((word) => !excluded.has(word));
+  if (pool.length < count) {
     throw new Error("Not enough words available for sampling.");
   }
 
-  const copy = [...state.words];
-  for (let i = copy.length - 1; i > 0; i--) {
+  for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
+    [pool[i], pool[j]] = [pool[j], pool[i]];
   }
 
-  return copy.slice(0, count);
+  return pool.slice(0, count);
 }
 
 function formatEquation(words, coeffs) {
@@ -279,10 +283,12 @@ function startRound() {
   try {
     const equationType = EQUATION_TYPES[Math.floor(Math.random() * EQUATION_TYPES.length)];
     const words = sampleWords(equationType.coeffs.length);
+    const comparisonWords = sampleWords(ADDITIONAL_WORD_COUNT, new Set(words));
     const targetData = buildTargetVector(words, equationType.coeffs);
 
     state.currentEquation = {
       words,
+      comparisonWords,
       coeffs: equationType.coeffs,
       targetVector: targetData.target,
       targetNorm: targetData.norm,
@@ -291,13 +297,37 @@ function startRound() {
 
     equationEl.textContent = state.currentEquation.equationText;
     guessInput.value = "";
+    lastSubmittedGuess = "";
     hideSuggestions();
     roundResultEl.className = "";
     roundResultEl.textContent = "No guess yet.";
     distanceResultEl.textContent = "Distance: -";
+    submittedDistanceEl.textContent = "Submitted word distance: -";
+    comparisonDistancesEl.innerHTML = "";
     setStatus("Equation ready. Enter your guess.");
   } catch (error) {
     setStatus(`Cannot start round: ${error.message}`);
+  }
+}
+
+function renderDistanceBreakdown(guessWord, guessDistance, comparisonDistances) {
+  submittedDistanceEl.textContent = `${guessWord}: ${guessDistance.toFixed(4)}`;
+  comparisonDistancesEl.innerHTML = "";
+
+  for (const entry of comparisonDistances) {
+    const li = document.createElement("li");
+    const span = document.createElement("span");
+    span.classList.add("word-chip");
+
+    if (entry.distance > guessDistance) {
+      span.classList.add("word-good");
+    } else if (entry.distance < guessDistance) {
+      span.classList.add("word-bad");
+    }
+
+    span.textContent = `${entry.word}: ${entry.distance.toFixed(4)}`;
+    li.appendChild(span);
+    comparisonDistancesEl.appendChild(li);
   }
 }
 
@@ -348,10 +378,19 @@ function submitGuess() {
     return;
   }
 
+  if (lastSubmittedGuess && canonicalGuess === lastSubmittedGuess) {
+    startRound();
+    return;
+  }
+
   guessInput.value = canonicalGuess;
 
   const distance = cosineDistanceToTarget(canonicalGuess);
   const roundPoints = scoreFromDistance(distance);
+  const comparisonDistances = state.currentEquation.comparisonWords.map((word) => ({
+    word,
+    distance: cosineDistanceToTarget(word),
+  }));
 
   state.rounds += 1;
   state.points += roundPoints;
@@ -369,7 +408,9 @@ function submitGuess() {
   roundResultEl.className = roundPoints > 0 ? "result-good" : "result-bad";
   roundResultEl.textContent = `Points this round: ${roundPoints}`;
   distanceResultEl.textContent = `Distance: ${distance.toFixed(4)}`;
-  setStatus("Round scored. Click 'New equation' for another one.");
+  renderDistanceBreakdown(canonicalGuess, distance, comparisonDistances);
+  lastSubmittedGuess = canonicalGuess;
+  setStatus("Round scored. Submit the same word again to go to the next round.");
 }
 
 function renderHistory() {
