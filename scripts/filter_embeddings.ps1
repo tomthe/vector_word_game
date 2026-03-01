@@ -10,8 +10,8 @@ param(
     [string]$GermanVecGzPath = "cc.de.300.vec.gz",
     [int]$GermanSmallTopN = 14000,
     [string]$GermanSmallOutputPath = "web/data/cc.de.300.top14000.txt",
-    [int]$GermanMediumTopN = 50000,
-    [string]$GermanMediumOutputPath = "web/data/cc.de.300.top50000.txt",
+    [int]$GermanMediumTopN = 30000,
+    [string]$GermanMediumOutputPath = "web/data/cc.de.300.top30000.txt",
     [switch]$SkipEnglish,
     [switch]$SkipGerman
 )

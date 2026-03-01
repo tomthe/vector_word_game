@@ -43,7 +43,7 @@ This generates dataset files in `web/data/` for any available source files (Engl
 - `glove.2024.wikigiga.50d.top14000.txt`
 - `glove.2024.wikigiga.50d.top50000.txt`
 - `cc.de.300.top14000.txt`
-- `cc.de.300.top50000.txt`
+- `cc.de.300.top30000.txt`
 
 German source defaults to `cc.de.300.vec.gz` in the repository root.
 

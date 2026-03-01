@@ -15,7 +15,7 @@ const state = {
 const SMALL_DATASET_PATH = "data/glove.2024.wikigiga.50d.top14000.txt";
 const MEDIUM_DATASET_PATH = "data/glove.2024.wikigiga.50d.top50000.txt";
 const DE_SMALL_DATASET_PATH = "data/cc.de.300.top14000.txt";
-const DE_MEDIUM_DATASET_PATH = "data/cc.de.300.top50000.txt";
+const DE_MEDIUM_DATASET_PATH = "data/cc.de.300.top30000.txt";
 
 const DEFAULT_SMALL_DATASET_BY_LANG = {
   en: SMALL_DATASET_PATH,
@@ -40,12 +40,12 @@ const I18N = {
     datasetPresetEnSmall: "English small (14k)",
     datasetPresetEnMedium: "English medium (50k)",
     datasetPresetDeSmall: "German small (14k)",
-    datasetPresetDeMedium: "German medium (50k)",
+    datasetPresetDeMedium: "German medium (30k)",
     datasetPresetCustom: "Custom path",
     wordsPerSideLabel: "Words per side (n)",
     autoIncrementLabel: "Auto-increment n per round",
     reloadEmbeddingsBtn: "Reload embeddings",
-    loadBigDatasetBtn: "Load big dataset (medium, 50k)",
+    loadBigDatasetBtn: "Load big dataset (medium)",
     statusLoadingDefault: "Loading default small dataset...",
     yourWordsTitle: "Your words",
     enemyWordsTitle: "Enemy words",
@@ -93,12 +93,12 @@ const I18N = {
     datasetPresetEnSmall: "Englisch klein (14k)",
     datasetPresetEnMedium: "Englisch mittel (50k)",
     datasetPresetDeSmall: "Deutsch klein (14k)",
-    datasetPresetDeMedium: "Deutsch mittel (50k)",
+    datasetPresetDeMedium: "Deutsch mittel (30k)",
     datasetPresetCustom: "Eigener Pfad",
     wordsPerSideLabel: "Wörter pro Seite (n)",
     autoIncrementLabel: "n pro Runde automatisch erhöhen",
     reloadEmbeddingsBtn: "Embeddings neu laden",
-    loadBigDatasetBtn: "Großen Datensatz laden (mittel, 50k)",
+    loadBigDatasetBtn: "Großen Datensatz laden (mittel)",
     statusLoadingDefault: "Standard-Datensatz wird geladen...",
     yourWordsTitle: "Deine Wörter",
     enemyWordsTitle: "Gegnerwörter",
